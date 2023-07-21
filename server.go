@@ -9,6 +9,7 @@ import (
 
 type StockServer struct {
 	stockHistoryHandler StockHistoryHandler
+	userStockHandler    UserStockHandle
 	http.Handler
 }
 
@@ -24,9 +25,20 @@ func WithStockHistoryHandler(stockHistoryHandler StockHistoryHandler) Option {
 	}
 }
 
+func WithUserStockHandler(userStockHandler UserStockHandle) Option {
+	return func(s *StockServer) error {
+		if userStockHandler == nil {
+			return fmt.Errorf("can't create a stock server without a user stock handler")
+		}
+		s.userStockHandler = userStockHandler
+		return nil
+	}
+}
+
 func NewStockServer(options ...Option) (*StockServer, error) {
 	stockServer := StockServer{}
 	stockServer.stockHistoryHandler = HandleStockHistory
+	stockServer.userStockHandler = HandleUserStock
 	router := http.NewServeMux()
 	router.HandleFunc("/tickers", basicAuthMiddleware(stockServer.handleUserStocks))
 	router.HandleFunc("/tickers/", basicAuthMiddleware(stockServer.handleStockHistory))
@@ -55,7 +67,7 @@ func (s *StockServer) handleStockHistory(response http.ResponseWriter, request *
 
 func (s *StockServer) handleUserStocks(response http.ResponseWriter, request *http.Request) {
 	user, _, _ := request.BasicAuth()
-	userStocks := GetUserStock(user)
+	userStocks := s.userStockHandler(user)
 	json.NewEncoder(response).Encode(&userStocks)
 }
 

@@ -13,6 +13,13 @@ type Stock struct {
 	Price  float64 `json:"price"`
 }
 
+func NewStock(ticker string, date time.Time) Stock {
+	return Stock{
+		Ticker: ticker,
+		Date:   date.Format("2006-01-02"),
+	}
+}
+
 type UserStock struct {
 	Ticker string  `json:"symbol"`
 	Price  float64 `json:"price"`
@@ -25,11 +32,11 @@ func GetStockHistory(ticker string, length int) []Stock {
 	now := time.Now()
 	for i := length; i > 1; i-- {
 		iterationDate := now.AddDate(0, 0, -i+1)
-		stock := Stock{Date: iterationDate.Format("2006-01-02"), Ticker: ticker}
+		stock := NewStock(ticker, iterationDate)
 		stock.Price = getPrice(stock.Ticker, stock.Date)
 		stockHistory[i-1] = stock
 	}
-	stock := Stock{Date: now.Format("2006-01-02"), Ticker: ticker}
+	stock := NewStock(ticker, now)
 	stock.Price = getPrice(stock.Ticker, stock.Date)
 	stockHistory[0] = stock
 	return stockHistory

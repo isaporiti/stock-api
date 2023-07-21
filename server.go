@@ -8,25 +8,25 @@ import (
 )
 
 type StockServer struct {
-	getStockHistory StockHistoryGetter
+	stockHistoryHandler StockHistoryHandler
 	http.Handler
 }
 
 type Option func(*StockServer) error
 
-func WithStockHistoryGetter(stockHistoryGetter StockHistoryGetter) Option {
+func WithStockHistoryHandler(stockHistoryHandler StockHistoryHandler) Option {
 	return func(s *StockServer) error {
-		if stockHistoryGetter == nil {
-			return fmt.Errorf("can't create a stock server without a stock history getter")
+		if stockHistoryHandler == nil {
+			return fmt.Errorf("can't create a stock server without a stock history handler")
 		}
-		s.getStockHistory = stockHistoryGetter
+		s.stockHistoryHandler = stockHistoryHandler
 		return nil
 	}
 }
 
 func NewStockServer(options ...Option) (*StockServer, error) {
 	stockServer := StockServer{}
-	stockServer.getStockHistory = GetStockHistory
+	stockServer.stockHistoryHandler = HandleStockHistory
 	router := http.NewServeMux()
 	router.HandleFunc("/tickers", basicAuthMiddleware(stockServer.handleUserStocks))
 	router.HandleFunc("/tickers/", basicAuthMiddleware(stockServer.handleStockHistory))
@@ -44,13 +44,13 @@ func NewStockServer(options ...Option) (*StockServer, error) {
 
 func (s *StockServer) handleStockHistory(response http.ResponseWriter, request *http.Request) {
 	ticker := getTicker(request)
-	if isKnown(ticker) {
-		history := s.getStockHistory(ticker, 90)
-		response.Header().Set("content-type", "application/json")
-		json.NewEncoder(response).Encode(history)
+	stockHistory, err := s.stockHistoryHandler(ticker)
+	if err != nil {
+		response.WriteHeader(http.StatusNotFound)
 		return
 	}
-	response.WriteHeader(http.StatusNotFound)
+	response.Header().Set("content-type", "application/json")
+	json.NewEncoder(response).Encode(stockHistory)
 }
 
 func (s *StockServer) handleUserStocks(response http.ResponseWriter, request *http.Request) {

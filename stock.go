@@ -25,8 +25,6 @@ type UserStock struct {
 	Price  float64 `json:"price"`
 }
 
-type StockHistoryGetter func(ticker string, length int) []Stock
-
 func GetStockHistory(ticker string, length int) []Stock {
 	var stockHistory []Stock = make([]Stock, length)
 	now := time.Now()

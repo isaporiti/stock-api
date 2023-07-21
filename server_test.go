@@ -15,7 +15,7 @@ func TestTickerHistory_unknown_ticker(t *testing.T) {
 		t.Parallel()
 		request := newStockHistoryRequest(t, "UNKNOWN")
 		response := httptest.NewRecorder()
-		server, err := NewStockServer(WithStockHistoryGetter(getStubStockHistory))
+		server, err := NewStockServer()
 		if err != nil {
 			t.Fatalf("could not create server: %s", err)
 		}
@@ -43,7 +43,7 @@ func newStockHistoryRequest(t *testing.T, ticker string) *http.Request {
 func TestTickerHistory_known_ticker(t *testing.T) {
 	for _, ticker := range knownTickers {
 		testName := fmt.Sprintf("responds OK when requested %s ticker", ticker)
-		server, err := NewStockServer(WithStockHistoryGetter(getStubStockHistory))
+		server, err := NewStockServer(WithStockHistoryHandler(stubStockHistoryHandler))
 		if err != nil {
 			t.Fatalf("could not create server: %s", err)
 		}
@@ -69,14 +69,14 @@ func TestTickerHistory_known_ticker(t *testing.T) {
 		var err error
 		request := newStockHistoryRequest(t, "MSFT")
 		response := httptest.NewRecorder()
-		server, err := NewStockServer(WithStockHistoryGetter(getStubStockHistory))
+		server, err := NewStockServer(WithStockHistoryHandler(stubStockHistoryHandler))
 		if err != nil {
 			t.Fatalf("could not create server: %s", err)
 		}
 
 		server.ServeHTTP(response, request)
 
-		want := getStubStockHistory("MSFT", 2)
+		want, _ := stubStockHistoryHandler("MSFT")
 		var got []Stock
 		json.NewDecoder(response.Body).Decode(&got)
 		if len(got) != len(want) {
@@ -90,11 +90,11 @@ func TestTickerHistory_known_ticker(t *testing.T) {
 	})
 }
 
-func getStubStockHistory(ticker string, length int) []Stock {
+func stubStockHistoryHandler(ticker string) ([]Stock, error) {
 	return []Stock{
 		{Date: "2023-07-19", Price: 6.1},
 		{Date: "2023-07-19", Price: 10.5},
-	}
+	}, nil
 }
 
 func TestUserStocks(t *testing.T) {

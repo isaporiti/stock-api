@@ -106,11 +106,33 @@ func TestUserStocks(t *testing.T) {
 	testCases := []testCase{
 		{
 			user: "testA",
-			want: []string{"MSFT", "AAPL", "AMZN"},
+			want: []string{
+				"AAPL",
+				"GOOG",
+				"FB",
+				"NVDA",
+				"BABA",
+				"WMT",
+				"PYPL",
+				"ADBE",
+				"V",
+				"CRM",
+			},
 		},
 		{
 			user: "testB",
-			want: []string{"FB", "NFLX"},
+			want: []string{
+				"MSFT",
+				"AMZN",
+				"TSLA",
+				"JPM",
+				"JNJ",
+				"PG",
+				"DIS",
+				"PFE",
+				"MA",
+				"NFLX",
+			},
 		},
 	}
 	for _, test := range testCases {

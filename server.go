@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type StockServer struct {
@@ -56,20 +55,7 @@ func (s *StockServer) handleStockHistory(response http.ResponseWriter, request *
 
 func (s *StockServer) handleUserStocks(response http.ResponseWriter, request *http.Request) {
 	user, _, _ := request.BasicAuth()
-	var userStocks []UserStock
-	date := time.Now().Format("2006-01-02")
-	if user == "testA" {
-		userStocks = []UserStock{
-			{Ticker: "MSFT", Price: getPrice("MSFT", date)},
-			{Ticker: "AAPL", Price: getPrice("AAPL", date)},
-			{Ticker: "AMZN", Price: getPrice("AMZN", date)},
-		}
-	} else {
-		userStocks = []UserStock{
-			{Ticker: "FB", Price: getPrice("FB", date)},
-			{Ticker: "NFLX", Price: getPrice("NFLX", date)},
-		}
-	}
+	userStocks := GetUserStock(user)
 	json.NewEncoder(response).Encode(&userStocks)
 }
 

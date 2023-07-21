@@ -39,7 +39,7 @@ func TestBasicAuthMiddleware(t *testing.T) {
 		t.Run(test, func(t *testing.T) {
 			t.Parallel()
 			request, err := http.NewRequest(http.MethodGet, "/test", nil)
-			request.SetBasicAuth("testA", "")
+			request.SetBasicAuth(user, "")
 			if err != nil {
 				t.Fatal(err)
 			}

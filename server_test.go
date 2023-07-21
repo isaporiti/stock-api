@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestTickerHistory_unknown_ticker(t *testing.T) {
@@ -99,23 +100,17 @@ func getStubStockHistory(ticker string, length int) []Stock {
 func TestUserStocks(t *testing.T) {
 	type testCase struct {
 		user string
-		want []UserStock
+		want []string
 	}
+	date := time.Now().Format("2006-01-02")
 	testCases := []testCase{
 		{
 			user: "testA",
-			want: []UserStock{
-				{Ticker: "MSFT", Price: 10},
-				{Ticker: "AAPL", Price: 20},
-				{Ticker: "AMZN", Price: 4},
-			},
+			want: []string{"MSFT", "AAPL", "AMZN"},
 		},
 		{
 			user: "testB",
-			want: []UserStock{
-				{Ticker: "FB", Price: 13},
-				{Ticker: "NFLX", Price: 7},
-			},
+			want: []string{"FB", "NFLX"},
 		},
 	}
 	for _, test := range testCases {
@@ -142,7 +137,8 @@ func TestUserStocks(t *testing.T) {
 				t.Fatal("didn't get the expected amount of user stock")
 			}
 			for i := range test.want {
-				if !reflect.DeepEqual(test.want[i], got[i]) {
+				want := UserStock{Ticker: test.want[i], Price: getPrice(test.want[i], date)}
+				if !reflect.DeepEqual(want, got[i]) {
 					t.Errorf("want %v user stock, got %v", test.want[i], got[i])
 				}
 			}

@@ -26,17 +26,17 @@ func GetStockHistory(ticker string, length int) []Stock {
 	for i := length; i > 1; i-- {
 		iterationDate := now.AddDate(0, 0, -i+1)
 		stock := Stock{Date: iterationDate.Format("2006-01-02"), Ticker: ticker}
-		stock.Price = getPrice(&stock)
+		stock.Price = getPrice(stock.Ticker, stock.Date)
 		stockHistory[i-1] = stock
 	}
 	stock := Stock{Date: now.Format("2006-01-02"), Ticker: ticker}
-	stock.Price = getPrice(&stock)
+	stock.Price = getPrice(stock.Ticker, stock.Date)
 	stockHistory[0] = stock
 	return stockHistory
 }
 
-func getPrice(stock *Stock) float64 {
-	inputString := fmt.Sprintf("%v%s", stock.Date, stock.Ticker)
+func getPrice(ticker string, date string) float64 {
+	inputString := fmt.Sprintf("%v%s", date, ticker)
 	hasher := sha256.New()
 	hasher.Write([]byte(inputString))
 	hashBytes := hasher.Sum(nil)

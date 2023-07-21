@@ -81,7 +81,11 @@ func GetUserStock(user string) []UserStock {
 	var userStock []UserStock
 	date := time.Now().Format("2006-01-02")
 	for i, ticker := range knownTickers {
-		if i%2 == 0 {
+		if user == "testA" && i%2 == 0 {
+			userStock = append(userStock, UserStock{Ticker: ticker, Price: getPrice(ticker, date)})
+			continue
+		}
+		if user == "testB" && i%2 != 0 {
 			userStock = append(userStock, UserStock{Ticker: ticker, Price: getPrice(ticker, date)})
 		}
 	}

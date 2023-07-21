@@ -51,6 +51,7 @@ func TestIsKnown(t *testing.T) {
 
 func TestGetUserStock(t *testing.T) {
 	t.Run("returns even tickers for testA", func(t *testing.T) {
+		t.Parallel()
 		got := GetUserStock("testA")
 		want := []string{
 			"AAPL",
@@ -74,4 +75,28 @@ func TestGetUserStock(t *testing.T) {
 		}
 	})
 
+	t.Run("returns odd tickers for testB", func(t *testing.T) {
+		t.Parallel()
+		got := GetUserStock("testB")
+		want := []string{
+			"MSFT",
+			"AMZN",
+			"TSLA",
+			"JPM",
+			"JNJ",
+			"PG",
+			"DIS",
+			"PFE",
+			"MA",
+			"NFLX",
+		}
+		if len(want) != len(got) {
+			t.Fatal("didn't get the expected amount of user stock")
+		}
+		for i := range got {
+			if want[i] != got[i].Ticker {
+				t.Errorf("want ticker %s, got %s", want[i], got[i].Ticker)
+			}
+		}
+	})
 }
